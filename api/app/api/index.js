@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { validate } = require('express-validation');
 
+const authorization = require('./middlewares/authorization');
+
 function trycatch(methods, ...args) {
 	return async (req, res, next) => {
 		try {
@@ -14,7 +16,11 @@ function trycatch(methods, ...args) {
 
 // Games Route
 const games = require('./controllers/games');
-router.get('/games', validate(games.list.validation), trycatch(games.list.route));
+router.get('/games', authorization(), validate(games.list.validation), trycatch(games.list.route));
 router.get('/games/:gameId', validate(games.get.validation), trycatch(games.get.route));
+
+const auth = require('./controllers/auth');
+router.post('/signup', validate(auth.signup.validation), trycatch(auth.signup.route));
+router.post('/signin', validate(auth.signin.validation), trycatch(auth.signin.route));
 
 module.exports = router;

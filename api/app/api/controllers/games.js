@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const db = require("@db");
 
 module.exports = {
 	list: {
@@ -7,9 +8,15 @@ module.exports = {
 			}),
 		},
         route: async (req, res) => {
-            placeholder = "It works!";
+            const games = await db.all("Game");
 
-			res.status(200).json({ placeholder });
+            gamesArray = [];
+            gamesCount = games.length;
+            for (let i = 0; i < gamesCount; i++) {
+                gamesArray.push(games.get(i).properties());
+            }
+
+            res.status(200).json(gamesArray);
 		}
 	},
 	get: {

@@ -1,24 +1,17 @@
+const bcrypt = require("bcrypt");
+
 module.exports = async function (instance) {
     console.log("Running migration: 250127001-create-User");
 
     try {
-        // Création d'un nœud User avec l'ID le plus bas possible
-        await instance.writeCypher(`
-            MERGE (u:User {id: '00000000-0000-0000-0000-000000000001', username: 'test_user', password: 'password123'})
-        `);
+        const user = await instance.create("User", {
+            username: "Soon",
+            password: await bcrypt.hash("password", 10),
+        });
 
-        // Création d'une relation PLAYED entre User et Game avec des valeurs factices
-        await instance.writeCypher(`
-            MATCH (u:User {id: '00000000-0000-0000-0000-000000000001'}),
-                  (g:Game {id: '00000000-0000-0000-0000-000000000001'})
-            MERGE (u)-[:PLAYED {rating: 5, comment: 'Great game!'}]->(g)
-        `);
+        const game = await instance.first("Game", { title: "Overwatch 2" });
 
-        // Ajout d'un enregistrement de la migration dans la base de données
-        await instance.writeCypher(`
-            MERGE (m:Migration { version: "250127001" })
-            ON CREATE SET m.appliedAt = datetime()
-        `);
+        await user.relateTo(game, "played", { rating: 4, comment: "Fun game!" });
 
         console.log("Migration 250127001-create-User applied successfully.");
     } catch (error) {
