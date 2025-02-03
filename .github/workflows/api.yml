@@ -33,5 +33,5 @@ jobs:
                 context: ./api  # Contexte du backend API
                 file: ./docker/api.Dockerfile
                 push: true
-                platforms: linux/amd64
+                platforms: linux/amd64,linux/arm64
                 tags: ${{ secrets.DOCKER_USERNAME }}/vgr:api-latest
