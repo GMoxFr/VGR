@@ -2,6 +2,7 @@
 node_modules
 /dist
 .secrets
+kubernetes/secret-*.yml
 
 
 # local env files
