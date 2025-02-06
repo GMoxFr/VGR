@@ -30,8 +30,8 @@ jobs:
             - name: Build and Push API Docker Image
               uses: docker/build-push-action@v4
               with:
-                context: ./api  # Contexte du backend API
-                file: ./docker/api.Dockerfile
+                context: ./web  # Contexte du backend API
+                file: ./docker/web.Dockerfile
                 push: true
                 platforms: linux/amd64,linux/arm64
                 tags: ${{ secrets.DOCKER_USERNAME }}/vgr:web-latest
