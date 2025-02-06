@@ -4,7 +4,6 @@ import api from '@/api'
 export const useUserStore = defineStore('userStore', {
     state: () => ({
         token: sessionStorage.getItem('userToken') || null,
-        expiration: sessionStorage.getItem('userExpiration') || null,
         user: null,
     }),
     actions: {
@@ -17,10 +16,8 @@ export const useUserStore = defineStore('userStore', {
                 }
 
                 this.token = response.data.token;
-                this.expiration = new Date().getTime() + response.data.expiration * 1000; // Stocker un timestamp exact
 
                 sessionStorage.setItem('userToken', this.token);
-                sessionStorage.setItem('userExpiration', this.expiration);
 
                 await this.fetchUser();
             } catch (error) {
@@ -29,22 +26,48 @@ export const useUserStore = defineStore('userStore', {
             }
         },
 
+        async register(username, password, passwordConfirm) {
+            if (password !== passwordConfirm) {
+                throw new Error('Passwords do not match');
+            }
+
+            try {
+                const response = await api.auth.signup({ username, password, passwordConfirm });
+
+                if (response.status !== 201 || !response.data.token) {
+                    throw new Error('Invalid registration');
+                }
+
+                this.token = response.data.token;
+
+                sessionStorage.setItem('userToken', this.token);
+
+                await this.fetchUser();
+            } catch (error) {
+                console.error('Register error:', error);
+                throw error;
+            }
+        },
+
         async logout() {
             this.token = null;
-            this.expiration = null;
             this.user = null;
 
             sessionStorage.removeItem('userToken');
-            sessionStorage.removeItem('userExpiration');
+        },
+
+        async deleteAccount() {
+            try {
+                await api.profile.deleteUser();
+                this.logout();
+            } catch (error) {
+                console.error('Delete user error:', error);
+                throw error;
+            }
         },
 
         async fetchUser() {
             if (!this.token) {
-                return;
-            }
-
-            if (new Date().getTime() > this.expiration) {
-                this.logout();
                 return;
             }
 
@@ -60,24 +83,5 @@ export const useUserStore = defineStore('userStore', {
                 this.logout();
             }
         },
-
-        async refreshToken() {
-            try {
-                const response = await api.profile.refreshToken({ token: this.token });
-
-                if (response.status === 200 && response.data.token) {
-                    this.token = response.data.token;
-                    this.expiration = new Date().getTime() + response.data.expiration * 1000;
-
-                    sessionStorage.setItem('userToken', this.token);
-                    sessionStorage.setItem('userExpiration', this.expiration);
-                } else {
-                    this.logout();
-                }
-            } catch (error) {
-                console.error('Refresh token error:', error);
-                this.logout();
-            }
-        }
     }
 });

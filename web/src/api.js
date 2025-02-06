@@ -24,6 +24,9 @@ const api = {
         async getUser() {
             return axiosInstance.get('/api/profile');
         },
+        async deleteUser() {
+            return axiosInstance.delete('/api/profile');
+        },
     },
     auth: {
         async signup(data) {

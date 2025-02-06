@@ -9,11 +9,17 @@ module.exports = {
             body: Joi.object({
                 username: Joi.string().required(),
                 password: Joi.string().required(),
+                passwordConfirm: Joi.string().required(),
             }),
         },
         route: async (req, res) => {
             const username = req.body.username;
             const password = req.body.password;
+            const passwordConfirm = req.body.passwordConfirm;
+
+            if (password !== passwordConfirm) {
+                return res.status(400).json({ error: "Passwords do not match" });
+            }
 
             const user = await db.first("User", { username });
 

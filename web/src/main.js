@@ -9,6 +9,4 @@ const pinia = createPinia()
 app.use(router)
 app.use(pinia)
 
-console.log(process.env.VUE_APP_API_URL)
-
 app.mount('#app')

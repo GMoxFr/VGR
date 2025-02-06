@@ -25,5 +25,6 @@ router.post('/auth/signin', validate(auth.signin.validation), trycatch(auth.sign
 
 const profile = require('./controllers/profile');
 router.get('/profile', authorization(), validate(profile.get.validation), trycatch(profile.get.route));
+router.delete('/profile', authorization(), validate(profile.delete.validation), trycatch(profile.delete.route));
 
 module.exports = router;
