@@ -1,16 +1,32 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <div>
+        <router-view />
+    </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { onBeforeMount, computed } from 'vue';
+import { useUserStore } from '@/store/userStore';
+
 
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
+    setup() {
+        const store = useUserStore();
+
+        onBeforeMount(() => {
+            store.fetchUser();
+        });
+
+        return {
+            store,
+            user: computed(() => store.user),
+        };
+    },
+    methods: {
+        logout() {
+            this.store.logout();
+        },
+    },
 }
 </script>
 

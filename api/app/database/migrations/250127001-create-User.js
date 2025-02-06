@@ -9,9 +9,9 @@ module.exports = async function (instance) {
             password: await bcrypt.hash("password", 10),
         });
 
-        const game = await instance.first("Game", { title: "Overwatch 2" });
+        // const game = await instance.first("Game", { title: "Overwatch 2" });
 
-        await user.relateTo(game, "played", { rating: 4, comment: "Fun game!" });
+        // await user.relateTo(game, "played", { rating: 4, comment: "Fun game!" });
 
         console.log("Migration 250127001-create-User applied successfully.");
     } catch (error) {
