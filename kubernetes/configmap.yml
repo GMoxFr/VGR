@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: web-config
 data:
-  VUE_APP_API_URL: "http://api-service.default.svc.cluster.local:8000"
+  VUE_APP_API_URL: "http://vgr.local"
