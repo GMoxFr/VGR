@@ -5,9 +5,10 @@ module.exports = {
     id: { type: 'uuid', primary: true },
     username: { type: 'string', required: true },
     password: { type: 'string', required: true },
+    email: { type: 'string', required: false },
     token: { type: 'string', required: false },
-    createdAt: { type: 'datetime', default: () => new Date() },
-    updatedAt: { type: 'datetime', default: () => new Date() },
+    created_at: { type: 'datetime', default: () => new Date() },
+    updated_at: { type: 'datetime', default: () => new Date() },
 
     played: {
         type: 'relationship',
@@ -18,5 +19,12 @@ module.exports = {
             rating: { type: 'number', required: false },
             comment: { type: 'string', required: false },
         },
+    },
+
+    owns: {
+        type: 'relationship',
+        target: 'Game',
+        relationship: 'OWNS',
+        direction: 'out',
     },
 }

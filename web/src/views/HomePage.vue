@@ -20,6 +20,7 @@
 
         <GameListComponent v-if="user" />
 
+        <GameSearchComponent />
     </div>
 
 </template>
@@ -32,12 +33,14 @@ import { useUserStore } from '@/store/userStore';
 import LoginComponent from './components/LoginComponent.vue';
 import RegisterComponent from './components/RegisterComponent.vue';
 import GameListComponent from './components/GameListComponent.vue';
+import GameSearchComponent from './components/GameSearchComponent.vue';
 
 export default {
     components: {
         LoginComponent,
         RegisterComponent,
         GameListComponent,
+        GameSearchComponent,
     },
     setup() {
         const store = useUserStore();

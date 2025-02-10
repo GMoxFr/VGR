@@ -16,8 +16,9 @@ function trycatch(methods, ...args) {
 
 // Games Route
 const games = require('./controllers/games');
-router.get('/games', authorization(), validate(games.list.validation), trycatch(games.list.route));
-// router.get('/games/:gameId', validate(games.get.validation), trycatch(games.get.route));
+router.post('/games/search', validate(games.search.validation), trycatch(games.search.route));
+router.get('/games', validate(games.list.validation), trycatch(games.list.route));
+router.get('/games/:gameId', validate(games.get.validation), trycatch(games.get.route));
 
 const auth = require('./controllers/auth');
 router.post('/auth/signup', validate(auth.signup.validation), trycatch(auth.signup.route));
@@ -26,5 +27,10 @@ router.post('/auth/signin', validate(auth.signin.validation), trycatch(auth.sign
 const profile = require('./controllers/profile');
 router.get('/profile', authorization(), validate(profile.get.validation), trycatch(profile.get.route));
 router.delete('/profile', authorization(), validate(profile.delete.validation), trycatch(profile.delete.route));
+
+const library = require('./controllers/library');
+router.post('/library', authorization(), validate(library.add.validation), trycatch(library.add.route));
+router.delete('/library/:gameId', authorization(), validate(library.remove.validation), trycatch(library.remove.route));
+router.get('/library/:gameId', authorization(), validate(library.owned.validation), trycatch(library.owned.route));
 
 module.exports = router;

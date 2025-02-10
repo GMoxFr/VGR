@@ -43,6 +43,20 @@ const api = {
         async get(gameId) {
             return axiosInstance.get(`/api/games/${gameId}`);
         },
+        async search(data) {
+            return axiosInstance.post('/api/games/search', data);
+        }
+    },
+    library: {
+        async add(data) {
+            return axiosInstance.post('/api/library', data);
+        },
+        async remove(gameId) {
+            return axiosInstance.delete(`/api/library/${gameId}`);
+        },
+        async owned(gameId) {
+            return axiosInstance.get(`/api/library/${gameId}`);
+        }
     },
 }
 

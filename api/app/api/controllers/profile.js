@@ -29,5 +29,27 @@ module.exports = {
 
             res.status(200).json({ success: true });
         }
-    }
+    },
+    addToList: {
+        validation: {
+            body: Joi.object({
+                gameId: Joi.number().integer().required(),
+            }),
+        },
+        route: async (req, res) => {
+            const userInfos = req.user;
+            const gameId = req.body.gameId;
+
+            const game = await db.first("Game", { igdb_id: gameId });
+
+            if (!game) {
+                res.status(404).json({ error: 'Jeu non trouvé' });
+                return;
+            }
+
+            const owns = await userInfos.relateTo(game, "owns", {});
+
+            res.status(200).json({ success: true });
+        }
+    },
 };
