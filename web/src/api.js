@@ -45,17 +45,26 @@ const api = {
         },
         async search(data) {
             return axiosInstance.post('/api/games/search', data);
+        },
+        async popular(data) {
+            return axiosInstance.post('/api/games/popular', data);
         }
     },
     library: {
-        async add(data) {
-            return axiosInstance.post('/api/library', data);
+        async add(gameId) {
+            return axiosInstance.post(`/api/library/add/${gameId}`);
         },
         async remove(gameId) {
-            return axiosInstance.delete(`/api/library/${gameId}`);
+            return axiosInstance.delete(`/api/library/add/${gameId}`);
         },
         async owned(gameId) {
-            return axiosInstance.get(`/api/library/${gameId}`);
+            return axiosInstance.get(`/api/library/add/${gameId}`);
+        },
+        async myGames(data) {
+            return axiosInstance.post('/api/library/list', data);
+        },
+        async games(username, data) {
+            return axiosInstance.post(`/api/library/list/${username}`, data);
         }
     },
 }

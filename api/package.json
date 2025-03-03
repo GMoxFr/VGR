@@ -15,7 +15,8 @@
     "@router": "./app/router",
     "@db": "./app/db",
     "@database": "./app/database",
-    "@utils": "./app/utils"
+    "@utils": "./app/utils",
+    "@utilitaries": "./app/utilitaries"
   },
   "author": "Tristan NOBRE & Clément ZELTER",
   "license": "ISC",

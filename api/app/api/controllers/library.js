@@ -1,17 +1,16 @@
 const Joi = require('joi');
 const db = require("@db");
-const { route } = require('../../app');
 
 module.exports = {
     add: {
         validation: {
-            body: Joi.object({
+            params: Joi.object({
                 gameId: Joi.number().integer().required(),
             }),
         },
         route: async (req, res) => {
             const userInfos = req.user;
-            const gameId = Number(req.body.gameId);
+            const gameId = Number(req.params.gameId);
 
             const game = await db.first("Game", { igdb_id: gameId });
 
@@ -92,5 +91,90 @@ module.exports = {
                 res.status(500).json({ error: "Erreur serveur lors de la vérification du jeu" });
             }
         }
-    }
+    },
+    myGames: {
+        validation: {
+            body: Joi.object({
+                maxResults: Joi.number().integer().min(1).max(100).default(10),
+                page: Joi.number().integer().min(1).default(1),
+            }),
+        },
+        route: async (req, res) => {
+            try {
+                const userInfos = req.user;
+                const username = userInfos.get('username');
+
+                const maxResults = req.body.maxResults || 10;
+                const page = req.body.page || 1;
+                const skip = (page - 1) * maxResults;
+
+                const countResult = await db.cypher(`
+                MATCH (u:User {username: $username})-[:OWNS]->(g:Game)
+                RETURN count(g) AS total
+                `, { username }
+                );
+
+                const gameCount = countResult.records.length > 0 ? countResult.records[0].get('total').low : 0;
+
+                const resultGames = await db.cypher(`
+                MATCH (u:User {username: $username})-[:OWNS]->(g:Game)
+                RETURN g
+                ORDER BY g.title
+                SKIP ${skip} LIMIT ${maxResults}
+                `, { username }
+                );
+
+                const gamesArray = resultGames.records.map(record => record.get('g').properties);
+
+                res.status(200).json({ gamesArray, gameCount });
+            } catch (error) {
+                console.error("Erreur lors de la récupération des jeux possédés:", error);
+                res.status(500).json({ error: "Erreur serveur lors de la récupération des jeux" });
+            }
+        }
+    },
+    games: {
+        validation: {
+            body: Joi.object({
+                maxResults: Joi.number().integer().min(1).max(100).default(10),
+                page: Joi.number().integer().min(1).default(1),
+            }),
+            params: Joi.object({
+                username: Joi.string().required(),
+            }),
+        },
+        route: async (req, res) => {
+            try {
+                const username = req.params.username;
+
+                const maxResults = req.body.maxResults || 10;
+                const page = req.body.page || 1;
+                const skip = (page - 1) * maxResults;
+
+                // 🔥 Récupérer les jeux possédés par l'utilisateur
+                const countResult = await db.cypher(`
+                MATCH (u:User {username: $username})-[:OWNS]->(g:Game)
+                RETURN count(g) AS total
+                `, { username }
+                );
+
+                const gameCount = countResult.records.length > 0 ? countResult.records[0].get('total').low : 0;
+
+                const resultGames = await db.cypher(`
+                MATCH (u:User {username: $username})-[:OWNS]->(g:Game)
+                RETURN g
+                ORDER BY g.title
+                SKIP ${skip} LIMIT ${maxResults}
+                `, { username }
+                );
+
+                const gamesArray = resultGames.records.map(record => record.get('g').properties);
+
+                res.status(200).json({ gamesArray, gameCount });
+            } catch (error) {
+                console.error("Erreur lors de la récupération des jeux possédés:", error);
+                res.status(500).json({ error: "Erreur serveur lors de la récupération des jeux" });
+            }
+        }
+    },
 };

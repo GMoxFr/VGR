@@ -1,5 +1,6 @@
 <template>
-    <div>
+    <div id="app">
+        <NavbarComponent />
         <router-view />
     </div>
 </template>
@@ -7,7 +8,7 @@
 <script>
 import { onBeforeMount, computed } from 'vue';
 import { useUserStore } from '@/store/userStore';
-
+import NavbarComponent from './views/components/NavBar.vue';
 
 export default {
     setup() {
@@ -27,6 +28,9 @@ export default {
             this.store.logout();
         },
     },
+    components: {
+        NavbarComponent,
+    },
 }
 </script>
 
@@ -37,6 +41,10 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
 }
 </style>

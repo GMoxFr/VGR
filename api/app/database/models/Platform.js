@@ -10,5 +10,6 @@ module.exports = {
         target: 'Game',
         relationship: 'AVAILABLE_ON',
         direction: 'out',
+        eager: true,
     },
 }

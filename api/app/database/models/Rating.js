@@ -14,5 +14,6 @@ module.exports = {
         target: 'Game',
         relationship: 'IS_RATED',
         direction: 'out',
+        eager: true,
     },
 }

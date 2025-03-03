@@ -10,5 +10,6 @@ module.exports = {
         target: 'Game',
         relationship: 'HAS_KEYWORD',
         direction: 'out',
+        eager: true,
     },
 }

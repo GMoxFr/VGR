@@ -1,14 +1,12 @@
 <template>
-    <div class="search-page">
-        <h1>Search results for "{{ searchQuery }}"</h1>
+    <div class="library-page">
+        <h1>{{ isOwnLibrary ? "Ma bibliothèque" : `Bibliothèque de ${username}` }}</h1>
 
         <div v-if="games.length > 0" class="games">
-            <!-- Liste des jeux affichés en grid -->
             <div class="game-list">
-                <GameCard v-for="game in games" :key="game.title" :game="game" />
+                <GameCard v-for="game in games" :key="game.igdb_id.low" :game="game" />
             </div>
 
-            <!-- Pagination dynamique -->
             <div v-if="pages > 1" class="pagination">
                 <button @click="setPage(1)" :disabled="page === 1">&#8676;</button>
                 <button @click="setPage(page - 1)" :disabled="page === 1">&#8592;</button>
@@ -28,65 +26,73 @@
             </div>
         </div>
 
-        <p v-else>No game found</p>
+        <p v-else class="empty-message">
+            {{ isOwnLibrary ? "Votre bibliothèque est vide." : `Aucune donnée pour ${username}.` }}
+        </p>
     </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import { useUserStore } from "@/store/userStore";
 import api from "@/api";
 import GameCard from "./components/GameCard.vue";
 
 const route = useRoute();
-const searchQuery = ref("");
-const maxResults = 15; // Changement : affichage de 20 jeux au lieu de 10
-const page = ref(1);
+const userStore = useUserStore();
+
+const username = ref(route.params.username);
 const games = ref([]);
 const gameCount = ref(0);
+const page = ref(1);
+const maxResults = 15;
 
-// Fonction pour récupérer les jeux depuis l'API
-const fetchGames = async () => {
+// Vérifie si c'est la bibliothèque du user connecté
+const isOwnLibrary = computed(() => userStore.user?.username === username.value);
+
+// Fonction pour récupérer la bibliothèque
+const fetchLibrary = async () => {
     try {
-        const response = await api.games.search({
-            query: searchQuery.value,
-            maxResults,
-            page: page.value
-        });
+        const data = { maxResults, page: page.value };
+
+        let response;
+        if (isOwnLibrary.value) {
+            response = await api.library.myGames(data);
+        } else {
+            response = await api.library.games(username.value, data);
+        }
 
         games.value = response.data.gamesArray;
         gameCount.value = response.data.gameCount;
     } catch (error) {
-        console.error("Error while searching:", error);
+        console.error("Erreur lors du chargement de la bibliothèque:", error);
     }
 };
 
-// Définition du nombre total de pages
+// Nombre total de pages
 const pages = computed(() => Math.ceil(gameCount.value / maxResults));
 
 // Changement de page
 const setPage = (pageNum) => {
     if (pageNum >= 1 && pageNum <= pages.value) {
         page.value = pageNum;
-        fetchGames();
+        fetchLibrary();
     }
 };
 
-// Watch sur la query pour relancer la recherche
-watch(() => route.query.query, (newQuery) => {
-    searchQuery.value = newQuery || "";
+// Watch pour actualiser quand l’URL change
+watch(() => route.params.username, (newUsername) => {
+    username.value = newUsername;
     page.value = 1;
-    fetchGames();
+    fetchLibrary();
 }, { immediate: true });
 
-onMounted(() => {
-    searchQuery.value = route.query.query || "";
-    fetchGames();
-});
+onMounted(fetchLibrary);
 </script>
 
 <style scoped>
-.search-page {
+.library-page {
     width: 100vw;
     padding: 40px 0;
     background: #222;
@@ -95,7 +101,6 @@ onMounted(() => {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    /* Alignement centré */
 }
 
 .games {
@@ -105,7 +110,9 @@ onMounted(() => {
     align-items: center;
 }
 
+/* Grille de jeux */
 .game-list {
+    width: 80%;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(3, auto);
@@ -144,5 +151,12 @@ onMounted(() => {
 .pagination .active {
     background-color: #0056b3;
     font-weight: bold;
+}
+
+/* Message si la bibliothèque est vide */
+.empty-message {
+    font-size: 18px;
+    margin-top: 20px;
+    color: rgba(255, 255, 255, 0.7);
 }
 </style>

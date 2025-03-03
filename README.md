@@ -36,4 +36,6 @@ kubectl create secret docker-registry regcred \
     --docker-email=$DOCKER_EMAIL
 
 kubectl apply -f kubernetes/service-api.yml
+
+sudo kubectl port-forward svc/istio-ingressgateway -n istio-system 80:80
 ```

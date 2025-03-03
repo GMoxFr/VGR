@@ -1,29 +1,24 @@
-import { defineStore } from 'pinia'
-import api from '@/api'
+import { defineStore } from 'pinia';
+import api from '@/api';
 
 export const useUserStore = defineStore('userStore', {
     state: () => ({
-        token: sessionStorage.getItem('userToken') || null,
+        token: localStorage.getItem('userToken') || null, // ✅ Utilisation de localStorage pour persistance
         user: null,
+        isFetchingUser: false, // ✅ Empêche les appels API multiples
     }),
     actions: {
         async login(username, password) {
-            try {
-                const response = await api.auth.signin({ username, password });
+            const response = await api.auth.signin({ username, password });
 
-                if (response.status !== 200 || !response.data.token) {
-                    throw new Error('Invalid credentials');
-                }
-
-                this.token = response.data.token;
-
-                sessionStorage.setItem('userToken', this.token);
-
-                await this.fetchUser();
-            } catch (error) {
-                console.error('Login error:', error);
-                throw error;
+            if (response.status !== 200 || !response.data.token) {
+                throw new Error('Invalid credentials');
             }
+
+            this.token = response.data.token;
+            localStorage.setItem('userToken', this.token); // ✅ Sauvegarde dans localStorage
+
+            await this.fetchUser();
         },
 
         async register(username, password, passwordConfirm) {
@@ -31,29 +26,23 @@ export const useUserStore = defineStore('userStore', {
                 throw new Error('Passwords do not match');
             }
 
-            try {
-                const response = await api.auth.signup({ username, password, passwordConfirm });
+            const response = await api.auth.signup({ username, password, passwordConfirm });
 
-                if (response.status !== 201 || !response.data.token) {
-                    throw new Error('Invalid registration');
-                }
-
-                this.token = response.data.token;
-
-                sessionStorage.setItem('userToken', this.token);
-
-                await this.fetchUser();
-            } catch (error) {
-                console.error('Register error:', error);
-                throw error;
+            if (response.status !== 201 || !response.data.token) {
+                throw new Error('Invalid registration');
             }
+
+            this.token = response.data.token;
+            localStorage.setItem('userToken', this.token);
+
+            await this.fetchUser();
         },
 
         async logout() {
             this.token = null;
             this.user = null;
 
-            sessionStorage.removeItem('userToken');
+            localStorage.removeItem('userToken'); // ✅ Supprime le token persistant
         },
 
         async deleteAccount() {
@@ -67,9 +56,11 @@ export const useUserStore = defineStore('userStore', {
         },
 
         async fetchUser() {
-            if (!this.token) {
+            if (!this.token || this.user || this.isFetchingUser) {
                 return;
             }
+
+            this.isFetchingUser = true; // ✅ Empêche les appels multiples
 
             try {
                 const response = await api.profile.getUser();
@@ -81,7 +72,16 @@ export const useUserStore = defineStore('userStore', {
             } catch (error) {
                 console.error('Fetch user error:', error);
                 this.logout();
+            } finally {
+                this.isFetchingUser = false; // ✅ Réactive la possibilité d'appel
             }
         },
+
+        // ✅ Appel automatique lors du chargement de l'application
+        async initializeUser() {
+            if (this.token) {
+                await this.fetchUser();
+            }
+        }
     }
 });

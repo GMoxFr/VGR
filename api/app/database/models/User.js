@@ -26,5 +26,6 @@ module.exports = {
         target: 'Game',
         relationship: 'OWNS',
         direction: 'out',
+        eager: true,
     },
 }

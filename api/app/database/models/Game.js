@@ -14,6 +14,7 @@ module.exports = {
         target: 'Platform',
         relationship: 'AVAILABLE_ON',
         direction: 'out',
+        eager: true,
     },
 
     belongs_to: {
@@ -21,6 +22,7 @@ module.exports = {
         target: 'Genre',
         relationship: 'BELONGS_TO',
         direction: 'out',
+        eager: true,
     },
 
     developed_by: {
@@ -28,6 +30,7 @@ module.exports = {
         target: 'Company',
         relationship: 'DEVELOPED_BY',
         direction: 'out',
+        eager: true,
     },
 
     published_by: {
@@ -35,6 +38,7 @@ module.exports = {
         target: 'Company',
         relationship: 'PUBLISHED_BY',
         direction: 'out',
+        eager: true,
     },
 
     is_rated: {
@@ -42,6 +46,7 @@ module.exports = {
         target: 'Rating',
         relationship: 'IS_RATED',
         direction: 'out',
+        eager: true,
     },
 
     powered_by: {
@@ -49,6 +54,7 @@ module.exports = {
         target: 'GameEngine',
         relationship: 'POWERED_BY',
         direction: 'out',
+        eager: true,
     },
 
     has_keyword: {
@@ -56,6 +62,7 @@ module.exports = {
         target: 'Keyword',
         relationship: 'HAS_KEYWORD',
         direction: 'out',
+        eager: true,
     },
 
     is_part_of: {
@@ -63,6 +70,7 @@ module.exports = {
         target: 'Serie',
         relationship: 'IS_PART_OF',
         direction: 'out',
+        eager: true,
     },
 
     showcases: {
@@ -70,5 +78,6 @@ module.exports = {
         target: 'Franchise',
         relationship: 'SHOWCASES',
         direction: 'out',
+        eager: true,
     }
 }
