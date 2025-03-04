@@ -36,4 +36,7 @@ router.get('/library/add/:gameId', authorization(), validate(library.owned.valid
 router.post('/library/list', authorization(), validate(library.myGames.validation), trycatch(library.myGames.route));
 router.post('/library/list/:username', validate(library.games.validation), trycatch(library.games.route));
 
+const company = require('./controllers/company');
+router.get('/company/:companyId', validate(company.get.validation), trycatch(company.get.route));
+
 module.exports = router;

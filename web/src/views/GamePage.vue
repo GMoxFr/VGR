@@ -40,10 +40,13 @@
                 <!-- Développeurs -->
                 <div v-if="game.developers?.length && game.developers[0].name !== 'NULL'" class="info-section">
                     <h3>{{ getTitle("Développeur", game.developers) }}</h3>
-                    <RouterLink v-for="developer in game.developers" :key="developer.id" to="/">
+                    <RouterLink v-for="developer in game.developers" :key="developer.id"
+                        :to="{ name: 'Company', params: { companyId: getNeo4jNumber(developer.id) } }">
                         <span>
                             {{ developer.name }}
-                            <span v-if="developer.country"> - {{ getCountryWithFlag(developer.country) }}</span>
+                            <span v-if="developer.country && getCountryWithFlag(developer.country)">
+                                - {{ getCountryWithFlag(developer.country) }}
+                            </span>
                         </span>
                     </RouterLink>
                 </div>
@@ -51,10 +54,13 @@
                 <!-- Éditeurs -->
                 <div v-if="game.publishers?.length && game.publishers[0].name !== 'NULL'" class="info-section">
                     <h3>{{ getTitle("Éditeur", game.publishers) }}</h3>
-                    <RouterLink v-for="publisher in game.publishers" :key="publisher.id" to="/">
+                    <RouterLink v-for="publisher in game.publishers" :key="publisher.id"
+                        :to="{ name: 'Company', params: { companyId: getNeo4jNumber(publisher.id) } }">
                         <span>
                             {{ publisher.name }}
-                            <span v-if="publisher.country"> - {{ getCountryWithFlag(publisher.country) }}</span>
+                            <span v-if="publisher.country && getCountryWithFlag(publisher.country)">
+                                - {{ getCountryWithFlag(publisher.country) }}
+                            </span>
                         </span>
                     </RouterLink>
                 </div>
@@ -116,7 +122,7 @@ import GameCard from "./components/GameCard.vue";
 
 const getCountryWithFlag = (countryCode) => {
     const country = iso3166.whereNumeric(getNeo4jNumber(countryCode));
-    if (!country) return "Pays inconnu";
+    if (!country) return null;
 
     const flag = emojiFlags[country.alpha2]?.emoji || "🏳";
     return `${flag} ${country.country}`;

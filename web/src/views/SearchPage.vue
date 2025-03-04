@@ -95,7 +95,6 @@ onMounted(() => {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    /* Alignement centré */
 }
 
 .games {
@@ -113,7 +112,6 @@ onMounted(() => {
     justify-content: center;
 }
 
-/* Pagination */
 .pagination {
     margin-top: 20px;
     display: flex;

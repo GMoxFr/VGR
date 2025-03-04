@@ -67,6 +67,13 @@ const api = {
             return axiosInstance.post(`/api/library/list/${username}`, data);
         }
     },
+    company: {
+        async get(companyId, develop = false, publish = false) {
+            return axiosInstance.get(`/api/company/${companyId}`, {
+                params: { develop, publish }
+            });
+        }
+    },
 }
 
 export default api;

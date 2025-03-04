@@ -24,6 +24,11 @@ const routes = [
         name: 'Library',
         component: () => import('@/views/LibraryPage.vue')
     },
+    {
+        path: '/companies/:companyId',
+        name: 'Company',
+        component: () => import('@/views/CompanyPage.vue')
+    }
 ]
 
 const router = createRouter({
