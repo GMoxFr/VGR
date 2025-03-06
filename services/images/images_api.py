@@ -111,4 +111,4 @@ def get_image(image_id):
     return Response(img_response.content, content_type="image/jpeg")
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=8001, debug=True)

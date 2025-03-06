@@ -1,0 +1,51 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: vgr-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: vgr-routing
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - vgr-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /api
+    route:
+    - destination:
+        host: api.default.svc.cluster.local
+        port:
+          number: 81
+  - match:
+    - uri:
+        prefix: /images
+    route:
+    - destination: 
+        host: images.default.svc.cluster.local
+        port:
+          number: 82
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: web.default.svc.cluster.local
+        port:
+          number: 80
