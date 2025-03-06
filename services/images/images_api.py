@@ -59,7 +59,7 @@ def colorfulness_metric(r, g, b):
     mean_root = np.sqrt((rg_mean ** 2) + (yb_mean ** 2))
     return std_root + (0.3 * mean_root)
 
-@app.route("/colors/<string:image_id>", methods=["GET"])
+@app.route("/images/colors/<string:image_id>", methods=["GET"])
 def get_image_color(image_id):
     """Retrieve a suitable color"""
     
@@ -79,7 +79,7 @@ def get_image_color(image_id):
         "color": rgb_to_hex(vibrant_color)
     })
 
-@app.route("/image/<string:image_id>", methods=["GET"])
+@app.route("/images/image/<string:image_id>", methods=["GET"])
 def get_image(image_id):
     """Retrieve and return an IGDB image directly."""
     
