@@ -31,7 +31,7 @@ const gameImage = ref("/placeholder-game.png");
 
 // Fonction pour récupérer l’image du jeu depuis l'API et la stocker en binaire
 const fetchGameImage = async () => {
-    if (props.game.cover_image_id) {
+    if (props.game.cover_image_id && typeof props.game.cover_image_id === "string") {
         try {
             const response = await images.image.get(props.game.cover_image_id, "cover", "cover_big", true);
 
@@ -84,7 +84,11 @@ const getNeo4jNumber = (value) => (value && typeof value.low !== "undefined" ? v
 
 onMounted(fetchGameImage);
 
-watch(() => props.game.cover_image_id, fetchGameImage);
+watch(props, (newProp) => {
+    if (newProp) {
+        fetchGameImage();
+    }
+});
 </script>
 
 <style scoped>

@@ -163,8 +163,6 @@ const fetchGame = async () => {
         console.error("Erreur lors de la récupération du jeu:", err);
         error.value = err.response?.data?.error || "Erreur lors de la récupération du jeu";
     }
-
-    console.log("Game data:", game.value);
 };
 
 const fetchOwned = async () => {
