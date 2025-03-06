@@ -4,3 +4,4 @@ metadata:
   name: web-config
 data:
   VUE_APP_API_URL: "http://vgr.local"
+  VUE_APP_IMAGE_URL: "http://vgr.local"

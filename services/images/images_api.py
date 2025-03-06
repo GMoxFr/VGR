@@ -4,8 +4,10 @@ from io import BytesIO
 import numpy as np
 from sklearn.cluster import KMeans
 from PIL import Image
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 # IGDB Base Image URL
 IMAGE_BASE_URL = "https://images.igdb.com/igdb/image/upload"

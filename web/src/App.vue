@@ -5,42 +5,25 @@
     </div>
 </template>
 
-<script>
-import { onBeforeMount, computed } from 'vue';
+<script setup>
+import { onBeforeMount } from 'vue';
 import { useUserStore } from '@/store/userStore';
 import NavbarComponent from './views/components/NavBar.vue';
 
-export default {
-    setup() {
-        const store = useUserStore();
+const store = useUserStore();
 
-        onBeforeMount(() => {
-            store.fetchUser();
-        });
-
-        return {
-            store,
-            user: computed(() => store.user),
-        };
-    },
-    methods: {
-        logout() {
-            this.store.logout();
-        },
-    },
-    components: {
-        NavbarComponent,
-    },
-}
+onBeforeMount(() => {
+    store.fetchUser();
+});
 </script>
 
 <style>
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: #2c3e50;
 }
 
 body {

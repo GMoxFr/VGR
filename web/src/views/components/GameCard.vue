@@ -2,7 +2,7 @@
     <RouterLink :to="{ name: 'Game', params: { gameId: getNeo4jNumber(game.igdb_id) } }" class="game-card"
         @mouseenter="startMarquee" @mouseleave="stopMarquee">
 
-        <img :src="getGameImage(game)" alt="Game Cover" class="game-card-img" />
+        <img :src="gameImage" alt="Game Cover" class="game-card-img" />
         <div class="game-card-content">
             <div class="game-card-title">
                 <Vue3Marquee v-if="showMarquee" :duration="getTimeWithTitle(game.title)" :pause="marqueePaused"
@@ -15,21 +15,48 @@
 </template>
 
 <script setup>
-import { ref, defineProps } from "vue";
+import { ref, defineProps, onMounted, onUnmounted, watch } from "vue";
 import { Vue3Marquee } from "vue3-marquee";
+import images from "@/images";
 
 // Props
-defineProps({
+const props = defineProps({
     game: Object
 });
 
 const marqueePaused = ref(true);
 const showMarquee = ref(true);
+const blobImg = ref(null);
+const gameImage = ref("/placeholder-game.png");
 
-// Fonction pour récupérer l’image du jeu
-const getGameImage = (game) => {
-    return game.cover?.url || "/placeholder-game.png"; // Fallback si pas d'image
+// Fonction pour récupérer l’image du jeu depuis l'API et la stocker en binaire
+const fetchGameImage = async () => {
+    if (props.game.cover_image_id) {
+        try {
+            const response = await images.image.get(props.game.cover_image_id, "cover", "cover_big", true);
+
+            // Vérification du type
+            const contentType = response.headers["content-type"];
+            if (!contentType.startsWith("image/")) {
+                throw new Error("Le fichier reçu n'est pas une image !");
+            }
+
+            // Créer un blob
+            const blob = new Blob([response.data], { type: contentType });
+            gameImage.value = URL.createObjectURL(blob);
+        } catch (error) {
+            console.error("Erreur chargement image :", error);
+            gameImage.value = "/placeholder-game.png";
+        }
+    }
 };
+
+const revokeBlobUrl = () => {
+    if (blobImg.value) {
+        URL.revokeObjectURL(blobImg.value);
+    }
+};
+onUnmounted(revokeBlobUrl);
 
 // Fonction pour calculer la durée du scroll en fonction du titre
 const getTimeWithTitle = (title) => {
@@ -54,6 +81,10 @@ const stopMarquee = () => {
 
 // Convertit Neo4j ID en valeur simple si nécessaire
 const getNeo4jNumber = (value) => (value && typeof value.low !== "undefined" ? value.low : value);
+
+onMounted(fetchGameImage);
+
+watch(() => props.game.cover_image_id, fetchGameImage);
 </script>
 
 <style scoped>

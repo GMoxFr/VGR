@@ -1,11 +1,13 @@
 <template>
     <div v-if="game" class="game-container">
         <div class="game-header">
-            <div class="game-background"></div>
+            <div class="game-background" :style="{ backgroundImage: `url(${gameBackground})` }" v-if="useBackground">
+            </div>
+            <div class="game-background-color" :style="{ background: gameBackgroundGradient }" v-else></div>
 
-            <div class="game-header-infos">
+            <div class=" game-header-infos">
                 <div class="game-header-extra">
-                    <img src="/placeholder-game.png" alt="Game Cover" />
+                    <img :src="gameCover" alt="Game Cover" />
 
                     <button v-if="user && !owned" @click="addToLibrary">Ajouter à la bibliothèque</button>
                     <button v-if="user && owned" @click="removeFromLibrary">Retirer de la bibliothèque</button>
@@ -115,6 +117,7 @@ import { useRoute } from "vue-router";
 import { useUserStore } from "@/store/userStore";
 import moment from "moment";
 import api from "@/api";
+import images from "@/images";
 import iso3166 from "iso-3166-1";
 import emojiFlags from "emoji-flags";
 
@@ -127,6 +130,17 @@ const getCountryWithFlag = (countryCode) => {
     const flag = emojiFlags[country.alpha2]?.emoji || "🏳";
     return `${flag} ${country.country}`;
 };
+
+const darkenColor = (hex, factor = 0.7) => {
+    const rgb = hex.match(/\w\w/g).map((c) => parseInt(c, 16));
+    const darkenedRgb = rgb.map((c) => Math.max(0, Math.round(c * factor)));
+    return `#${darkenedRgb.map((c) => c.toString(16).padStart(2, "0")).join("")}`;
+};
+
+const gameBackgroundGradient = computed(() => {
+    const darkenedColor = darkenColor(gameBackgroundColor.value, 0.6); // Facteur de 60% de luminosité
+    return `linear-gradient(180deg, ${gameBackgroundColor.value}, ${darkenedColor})`;
+});
 
 const route = useRoute();
 const userStore = useUserStore();
@@ -183,6 +197,60 @@ const removeFromLibrary = async () => {
 
 const getNeo4jNumber = (value) => (value && typeof value.low !== "undefined" ? value.low : value);
 
+const gameCover = ref("/placeholder-game.png"); // Image par défaut
+
+const fetchGameCover = async () => {
+    if (game.value?.cover_image_id) {
+        try {
+            const response = await images.image.get(game.value.cover_image_id, "cover", "cover_big", true);
+
+            const contentType = response.headers["content-type"];
+            if (!contentType.startsWith("image/")) {
+                throw new Error("Le fichier reçu n'est pas une image !");
+            }
+
+            const blob = new Blob([response.data], { type: contentType });
+            gameCover.value = URL.createObjectURL(blob);
+        } catch (error) {
+            console.error("Erreur chargement cover :", error);
+            gameCover.value = "/placeholder-game.png";
+        }
+    }
+};
+
+const useBackground = ref(false);
+const gameBackground = ref("/background.jpg");
+const gameBackgroundColor = ref("#789399");
+
+const fetchGameBackground = async () => {
+    if (game.value?.screenshots_image_id[0]) {
+        try {
+            useBackground.value = true;
+            const response = await images.image.get(game.value.screenshots_image_id[0], "screenshot", "720p", false);
+            const contentType = response.headers["content-type"];
+            if (!contentType.startsWith("image/")) {
+                throw new Error("Le fichier reçu n'est pas une image !");
+            }
+
+            const blob = new Blob([response.data], { type: contentType });
+            gameBackground.value = URL.createObjectURL(blob);
+        } catch (error) {
+            console.error("Erreur chargement background :", error);
+            gameBackground.value = "/background.jpg";
+        }
+    } else if (game.value?.cover_image_id[10001]) {
+        try {
+            const colorResponse = await images.colors.get(game.value.cover_image_id);
+            console.log("Color response:", colorResponse.data.color);
+            gameBackgroundColor.value = colorResponse.data.color;
+            useBackground.value = false;
+        } catch (error) {
+            console.error("Erreur chargement background :", error);
+            gameBackground.value = "/background.jpg";
+        }
+    }
+};
+
 const releaseDate = computed(() => {
     return game.value ? moment.unix(getNeo4jNumber(game.value.release_date)).format("DD/MM/YYYY") : "";
 });
@@ -213,6 +281,13 @@ watch(
     },
     { immediate: true }
 );
+
+watch(game, (newGame) => {
+    if (newGame) {
+        fetchGameCover();
+        fetchGameBackground();
+    }
+});
 
 watch(user, (newUser) => {
     if (newUser) {
@@ -246,7 +321,7 @@ watch(user, (newUser) => {
     width: 110%;
     /* Augmenté pour masquer les bords du flou */
     height: 110%;
-    background-image: url("/public/background.jpg");
+    /* background-image: url("/public/background.jpg"); */
     /* Image de fond */
     background-size: cover;
     background-position: center;
@@ -254,6 +329,15 @@ watch(user, (newUser) => {
     filter: blur(10px) brightness(50%);
     transform: scale(1.1);
     /* Agrandissement léger pour éviter les bords visibles */
+    z-index: -1;
+}
+
+.game-background-color {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     z-index: -1;
 }
 
