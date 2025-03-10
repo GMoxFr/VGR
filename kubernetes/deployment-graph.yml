@@ -22,7 +22,7 @@ spec:
           image: gmoxfr/vgr:graph-latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 8000
+            - containerPort: 8002
           envFrom:
             - secretRef:
                 name: api-secrets
