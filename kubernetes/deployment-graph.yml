@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graph
+  labels:
+    app: graph
+    version: "1.0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: graph
+  template:
+    metadata:
+      labels:
+        app: graph
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: graph
+          image: gmoxfr/vgr:graph-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: api-secrets
+      restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: graph
+  labels:
+    app: graph
+spec:
+  selector:
+    app: graph
+  ports:
+    - protocol: TCP
+      port: 83
+      targetPort: 8002
+  type: LoadBalancer
+status:
+  loadBalancer: {}

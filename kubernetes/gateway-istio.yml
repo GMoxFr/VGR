@@ -43,6 +43,14 @@ spec:
           number: 82
   - match:
     - uri:
+        prefix: /graph
+    route:
+    - destination: 
+        host: graph.default.svc.cluster.local
+        port:
+          number: 83
+  - match:
+    - uri:
         prefix: /
     route:
     - destination:
