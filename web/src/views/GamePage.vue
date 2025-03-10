@@ -26,7 +26,8 @@
                 <!-- Plateformes -->
                 <div v-if="game.platforms?.length && game.platforms[0].name !== 'NULL'" class="info-section">
                     <h3>{{ getTitle("Plateforme", game.platforms) }}</h3>
-                    <RouterLink v-for="platform in game.platforms" :key="platform.id" to="/">
+                    <RouterLink v-for="platform in game.platforms" :key="platform.id"
+                        :to="{ name: 'Platform', params: { platformId: getNeo4jNumber(platform.id) } }">
                         <span>{{ platform.name }}</span>
                     </RouterLink>
                 </div>
@@ -34,7 +35,8 @@
                 <!-- Genres -->
                 <div v-if="game.genres?.length && game.genres[0].name !== 'NULL'" class="info-section">
                     <h3>{{ getTitle("Genre", game.genres) }}</h3>
-                    <RouterLink v-for="genre in game.genres" :key="genre.id" to="/">
+                    <RouterLink v-for="genre in game.genres" :key="genre.id"
+                        :to="{ name: 'Genre', params: { genreId: getNeo4jNumber(genre.id) } }">
                         <span>{{ genre.name }}</span>
                     </RouterLink>
                 </div>
@@ -70,7 +72,8 @@
                 <!-- Moteurs de jeu -->
                 <div v-if="game.engines?.length && game.engines[0].name !== 'NULL'" class="info-section">
                     <h3>{{ getTitle("Moteur de jeu", game.engines) }}</h3>
-                    <RouterLink v-for="engine in game.engines" :key="engine.id" to="/">
+                    <RouterLink v-for="engine in game.engines" :key="engine.id"
+                        :to="{ name: 'GameEngine', params: { gameEngineId: getNeo4jNumber(engine.id) } }">
                         <span>{{ engine.name }}</span>
                     </RouterLink>
                 </div>
@@ -78,7 +81,8 @@
                 <!-- Séries -->
                 <div v-if="game.series?.length && game.series[0].name !== 'NULL'" class="info-section">
                     <h3>{{ getTitle("Série", game.series) }}</h3>
-                    <RouterLink v-for="series in game.series" :key="series.id" to="/">
+                    <RouterLink v-for="series in game.series" :key="series.id"
+                        :to="{ name: 'Serie', params: { serieId: getNeo4jNumber(series.id) } }">
                         <span>{{ series.name }}</span>
                     </RouterLink>
                 </div>
@@ -86,7 +90,8 @@
                 <!-- Franchises -->
                 <div v-if="game.franchises?.length && game.franchises[0].name !== 'NULL'" class="info-section">
                     <h3>{{ getTitle("Franchise", game.franchises) }}</h3>
-                    <RouterLink v-for="franchise in game.franchises" :key="franchise.id" to="/">
+                    <RouterLink v-for="franchise in game.franchises" :key="franchise.id"
+                        :to="{ name: 'Franchise', params: { franchiseId: getNeo4jNumber(franchise.id) } }">
                         <span>{{ franchise.name }}</span>
                     </RouterLink>
                 </div>
@@ -94,7 +99,8 @@
                 <!-- Notes -->
                 <div v-if="game.ratings?.length && game.ratings[0].name !== 'NULL'" class="info-section">
                     <h3>{{ getTitle("Note", game.ratings) }}</h3>
-                    <RouterLink v-for="rating in game.ratings" :key="rating.id" to="/">
+                    <RouterLink v-for="rating in game.ratings" :key="rating.id"
+                        :to="{ name: 'Rating', params: { ratingId: getNeo4jNumber(rating.id) } }">
                         <span>{{ rating.name }}</span>
                     </RouterLink>
                 </div>

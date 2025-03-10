@@ -74,6 +74,66 @@ const api = {
             });
         }
     },
+    genre: {
+        async get(genreId, page = 1, maxResults = 10) {
+            return axiosInstance.get(`/api/genre/${genreId}`, {
+                params: {
+                    page,
+                    maxResults
+                }
+            });
+        }
+    },
+    platform: {
+        async get(platformId, page = 1, maxResults = 10) {
+            return axiosInstance.get(`/api/platform/${platformId}`, {
+                params: {
+                    page,
+                    maxResults
+                }
+            });
+        }
+    },
+    serie: {
+        async get(serieId, page = 1, maxResults = 10) {
+            return axiosInstance.get(`/api/series/${serieId}`, {
+                params: {
+                    page,
+                    maxResults
+                }
+            });
+        }
+    },
+    franchise: {
+        async get(franchiseId, page = 1, maxResults = 10) {
+            return axiosInstance.get(`/api/franchises/${franchiseId}`, {
+                params: {
+                    page,
+                    maxResults
+                }
+            });
+        }
+    },
+    gameEngine: {
+        async get(engineId, page = 1, maxResults = 10) {
+            return axiosInstance.get(`/api/engines/${engineId}`, {
+                params: {
+                    page,
+                    maxResults
+                }
+            });
+        }
+    },
+    rating: {
+        async get(ratingId, page = 1, maxResults = 10) {
+            return axiosInstance.get(`/api/ratings/${ratingId}`, {
+                params: {
+                    page,
+                    maxResults
+                }
+            });
+        }
+    }
 }
 
 export default api;

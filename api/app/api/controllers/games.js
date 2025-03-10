@@ -2,29 +2,6 @@ const Joi = require('joi');
 const db = require("@db");
 
 module.exports = {
-    list: {
-        validation: {
-            body: Joi.object({
-            }),
-        },
-        route: async (req, res) => {
-            if (true) {
-                gamesArray = [];
-                res.status(200).json({ gamesArray });
-                return;
-            }
-
-            const games = await db.all("Game");
-
-            gamesArray = [];
-            gamesCount = games.length;
-            for (let i = 0; i < gamesCount; i++) {
-                gamesArray.push(games.get(i).properties());
-            }
-
-            res.status(200).json(gamesArray);
-        }
-    },
     get: {
         validation: {
             params: Joi.object({

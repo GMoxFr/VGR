@@ -18,16 +18,14 @@ module.exports = {
                 const developAll = req.query.develop === "true";
                 const publishAll = req.query.publish === "true";
 
-                console.log(req.query);
-
-                const limitClause = (all) => (all ? "" : "LIMIT 10");
-
                 const result = await db.cypher(
                     `MATCH (c:Company {id: $companyId})
-                 OPTIONAL MATCH (c)<-[:DEVELOPED_BY]-(g:Game)
-                 WITH c, collect(DISTINCT g)[0..${developAll ? "" : "10"}] AS developedGames
-                 OPTIONAL MATCH (c)<-[:PUBLISHED_BY]-(g2:Game)
-                 RETURN c, developedGames, collect(DISTINCT g2)[0..${publishAll ? "" : "10"}] AS publishedGames`,
+                    OPTIONAL MATCH (c)<-[:DEVELOPED_BY]-(g:Game)
+                    WITH c, g ORDER BY g.title
+                    WITH c, collect(DISTINCT g)[0..${developAll ? "" : "10"}] AS developedGames
+                    OPTIONAL MATCH (c)<-[:PUBLISHED_BY]-(g2:Game)
+                    WITH c, developedGames, g2 ORDER BY g2.title
+                    RETURN c, developedGames, collect(DISTINCT g2)[0..${publishAll ? "" : "10"}] AS publishedGames`,
                     { companyId }
                 );
 

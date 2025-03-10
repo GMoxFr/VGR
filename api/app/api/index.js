@@ -17,7 +17,6 @@ function trycatch(methods, ...args) {
 // Games Route
 const games = require('./controllers/games');
 router.post('/games/search', validate(games.search.validation), trycatch(games.search.route));
-router.get('/games', validate(games.list.validation), trycatch(games.list.route));
 router.get('/games/:gameId', validate(games.get.validation), trycatch(games.get.route));
 router.post('/games/popular', validate(games.popular.validation), trycatch(games.popular.route));
 
@@ -38,5 +37,23 @@ router.post('/library/list/:username', validate(library.games.validation), tryca
 
 const company = require('./controllers/company');
 router.get('/company/:companyId', validate(company.get.validation), trycatch(company.get.route));
+
+const genre = require('./controllers/genre');
+router.get('/genre/:genreId', validate(genre.get.validation), trycatch(genre.get.route));
+
+const platform = require('./controllers/platform');
+router.get('/platform/:platformId', validate(platform.get.validation), trycatch(platform.get.route));
+
+const serie = require('./controllers/serie');
+router.get('/series/:serieId', validate(serie.get.validation), trycatch(serie.get.route));
+
+const franchise = require('./controllers/franchise');
+router.get('/franchises/:franchiseId', validate(franchise.get.validation), trycatch(franchise.get.route));
+
+const gameEngine = require('./controllers/gameEngine');
+router.get('/engines/:gameEngineId', validate(gameEngine.get.validation), trycatch(gameEngine.get.route));
+
+const rating = require('./controllers/rating');
+router.get('/ratings/:ratingId', validate(rating.get.validation), trycatch(rating.get.route));
 
 module.exports = router;

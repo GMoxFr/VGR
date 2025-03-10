@@ -28,7 +28,37 @@ const routes = [
         path: '/companies/:companyId',
         name: 'Company',
         component: () => import('@/views/CompanyPage.vue')
-    }
+    },
+    {
+        path: '/genres/:genreId',
+        name: 'Genre',
+        component: () => import('@/views/GenrePage.vue')
+    },
+    {
+        path: '/platforms/:platformId',
+        name: 'Platform',
+        component: () => import('@/views/PlatformPage.vue')
+    },
+    {
+        path: '/series/:serieId',
+        name: 'Serie',
+        component: () => import('@/views/SeriePage.vue')
+    },
+    {
+        path: '/franchises/:franchiseId',
+        name: 'Franchise',
+        component: () => import('@/views/FranchisePage.vue')
+    },
+    {
+        path: '/gameengines/:gameEngineId',
+        name: 'GameEngine',
+        component: () => import('@/views/GameEnginePage.vue')
+    },
+    {
+        path: '/ratings/:ratingId',
+        name: 'Rating',
+        component: () => import('@/views/RatingPage.vue')
+    },
 ]
 
 const router = createRouter({

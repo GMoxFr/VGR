@@ -1,12 +1,19 @@
 <template>
-    <div class="library-page">
-        <h1>{{ isOwnLibrary ? "Ma bibliothèque" : `Bibliothèque de ${username}` }}</h1>
+    <div v-if="gameEngine" class="game-engine-container">
+        <div class="game-engine-header-infos">
+            <div class="game-engine-header-info">
+                <h1>{{ nameWithCount }}</h1>
+            </div>
+        </div>
 
-        <div v-if="games.length > 0" class="games">
-            <div class="game-list">
+        <!-- Liste des jeux utilisant ce moteur -->
+        <div v-if="games.length > 0" class="game-engine-details">
+            <h2>🎮 Jeux utilisant ce moteur</h2>
+            <div class="similar-games-container">
                 <GameCard v-for="game in games" :key="game.igdb_id.low" :game="game" />
             </div>
 
+            <!-- Pagination dynamique -->
             <div v-if="pages > 1" class="pagination">
                 <button @click="setPage(1)" :disabled="page === 1">&#8676;</button>
                 <button @click="setPage(page - 1)" :disabled="page === 1">&#8592;</button>
@@ -26,87 +33,61 @@
             </div>
         </div>
 
-        <p v-else class="empty-message">
-            {{ isOwnLibrary ? "Votre bibliothèque est vide." : `Aucune donnée pour ${username}.` }}
+        <!-- Message si aucun jeu trouvé -->
+        <p v-if="games.length === 0" class="empty-message">
+            Aucun jeu trouvé utilisant ce moteur.
         </p>
     </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { useUserStore } from "@/store/userStore";
+import { ref, computed, onMounted, watch } from "vue";
+import { useRoute } from "vue-router";
 import api from "@/api";
 import GameCard from "./components/GameCard.vue";
 
 const route = useRoute();
-const router = useRouter();
-const userStore = useUserStore();
-
-const username = ref(route.params.username || userStore.user?.username || "");
+const gameEngine = ref(null);
 const games = ref([]);
-const gameCount = ref(0);
 const page = ref(1);
 const maxResults = 15;
+const gameCount = ref(0);
 
-// Vérifie si c'est la bibliothèque du user connecté
-const isOwnLibrary = computed(() => userStore.user?.username === username.value);
-
-// Redirection si pas de username et utilisateur non connecté
-if (!username.value) {
-    if (userStore.user) {
-        username.value = userStore.user.username;
-    } else {
-        router.push("/");
-    }
-}
-
-// Fonction pour récupérer la bibliothèque
-const fetchLibrary = async () => {
+// Charger les informations du moteur de jeu avec la pagination
+const fetchGames = async () => {
     try {
-        const data = { maxResults, page: page.value };
-
-        let response;
-        if (isOwnLibrary.value) {
-            response = await api.library.myGames(data);
-        } else {
-            response = await api.library.games(username.value, data);
-        }
-
-        games.value = response.data.gamesArray;
-        gameCount.value = response.data.gameCount;
+        console.log("Chargement des jeux pour le moteur de jeu:", route.params.gameEngineId);
+        const response = await api.gameEngine.get(route.params.gameEngineId, page.value, maxResults);
+        gameEngine.value = response.data;
+        games.value = response.data.games;
+        gameCount.value = response.data.totalGames;
     } catch (error) {
-        console.error("Erreur lors du chargement de la bibliothèque:", error);
+        console.error("Erreur lors du chargement des données du moteur de jeu:", error);
     }
 };
 
-// Nombre total de pages
+// Définition du nombre total de pages
 const pages = computed(() => Math.ceil(gameCount.value / maxResults));
 
 // Changement de page
 const setPage = (pageNum) => {
     if (pageNum >= 1 && pageNum <= pages.value) {
         page.value = pageNum;
-        fetchLibrary();
+        fetchGames();
     }
 };
 
-// Watch pour actualiser quand l’URL change
-watch(() => route.params.username, (newUsername) => {
-    username.value = newUsername || userStore.user?.username || "";
-    page.value = 1;
-    if (!username.value) {
-        router.push("/");
-    } else {
-        fetchLibrary();
-    }
-}, { immediate: true });
+const nameWithCount = computed(() => {
+    return `${gameEngine.value?.name} (${gameCount.value})`;
+});
 
-onMounted(fetchLibrary);
+watch(page, fetchGames);
+onMounted(fetchGames);
 </script>
 
 <style scoped>
-.library-page {
+/* Conteneur principal */
+.game-engine-container {
     width: 100vw;
     padding: 40px 0;
     background: #222;
@@ -117,24 +98,37 @@ onMounted(fetchLibrary);
     text-align: center;
 }
 
-.games {
+/* Infos du moteur de jeu */
+.game-engine-header-infos {
+    max-width: 70%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 40px 20px;
+    position: relative;
+}
+
+.game-engine-header-info h1 {
+    margin: 0;
+}
+
+/* Section des jeux */
+.game-engine-details {
     width: 70%;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/* Grille de jeux */
-.game-list {
-    width: 80%;
+.similar-games-container {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(3, auto);
+    grid-template-rows: repeat(2, auto);
     gap: 20px;
     justify-content: center;
 }
 
-/* Pagination */
 .pagination {
     margin-top: 20px;
     display: flex;
@@ -165,12 +159,5 @@ onMounted(fetchLibrary);
 .pagination .active {
     background-color: #0056b3;
     font-weight: bold;
-}
-
-/* Message si la bibliothèque est vide */
-.empty-message {
-    font-size: 18px;
-    margin-top: 20px;
-    color: rgba(255, 255, 255, 0.7);
 }
 </style>
