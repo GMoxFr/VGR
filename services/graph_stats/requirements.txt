@@ -1,0 +1,6 @@
+Flask
+flask-cors
+neo4j
+plotly
+pandas
+python-dotenv
