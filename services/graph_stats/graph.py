@@ -14,14 +14,15 @@ CORS(app)
 # Load .env file
 load_dotenv()
 
-# NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")  # Default to local
-NEO4J_PROTOCOL = os.getenv("NEO4J_PROTOCOL", "bolt")
+NEO4J_PROTOCOL = "neo4j+s"
 NEO4J_HOST = os.getenv("NEO4J_HOST", "localhost")
 NEO4J_PORT = os.getenv("NEO4J_PORT", "7687")
 
 NEO4J_URI = f"{NEO4J_PROTOCOL}://{NEO4J_HOST}:{NEO4J_PORT}"
 NEO4J_USER = os.getenv("NEO4J_USERNAME", "neo4j")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "password")
+
+print(f"Connecting to Neo4j at {NEO4J_URI} with user {NEO4J_USER}")
 
 driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
 
