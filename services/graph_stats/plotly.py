@@ -1,0 +1,123 @@
+from flask import Flask, jsonify
+from flask_cors import CORS
+from neo4j import GraphDatabase
+import plotly.express as px
+import pandas as pd
+import os
+from dotenv import load_dotenv
+
+app = Flask(__name__)
+CORS(app)
+
+# Load credentials from environment variables
+
+# Load .env file
+load_dotenv()
+
+NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")  # Default to local
+NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "password")
+
+driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+
+#---------- GENRE DISTRIBUTION ----------
+
+def get_genre_distribution(company_name):
+    """Query Neo4j to get the count of each genre developed by a company."""
+    with driver.session() as session:
+        query = """
+        MATCH (c:Company)-[:DEVELOPED_BY]-(g:Game)-[:BELONGS_TO]-(genre:Genre)
+        WHERE c.name CONTAINS $company_name AND genre.name <> "NULL"
+        RETURN genre.name AS genre, COUNT(g) AS count
+        """
+        result = session.run(query, company_name=company_name)
+        data = [{"genre": record["genre"], "count": record["count"]} for record in result]
+    return data
+
+@app.route("/graph/genre-distribution/<company_name>", methods=["GET"])
+def genre_distribution(company_name):
+    """Generate a plotly graph for genre distribution."""
+    
+    data = get_genre_distribution(company_name)  # Should return a list of dictionaries
+    if not data:
+        return jsonify({"error": "No data found"}), 404
+
+    # Convert list of dictionaries to DataFrame
+    df = pd.DataFrame(data)
+
+    # Sort data by count (descending)
+    df = df.sort_values(by="count", ascending=False)
+
+    # Assign unique colors for each genre
+    genre_colors = px.colors.qualitative.Set2  # You can change to another color set
+    color_map = {genre: genre_colors[i % len(genre_colors)] for i, genre in enumerate(df["genre"])}
+
+    # Create a sorted bar chart with colors
+    fig = px.bar(
+        df, 
+        x="genre", 
+        y="count", 
+        title=f"Genres Developed by {company_name}",
+        color="genre", 
+        color_discrete_map=color_map  # Assign colors to each genre
+    )
+
+    # Remove toolbar (mode bar)
+    fig.update_layout(
+        dragmode=False, 
+        showlegend=False, 
+        xaxis_title="", 
+        yaxis_title="Number of Games",
+        margin=dict(l=40, r=40, t=40, b=40)
+    )
+
+    return jsonify(fig.to_json())
+
+
+#--------- PLATFORM DISTRIBUTION ---------
+
+def get_platform_distribution(company_name):
+    """Query Neo4j to get the count of each platform and its generation developed by a company."""
+    with driver.session() as session:
+        query = """
+        MATCH (c:Company)-[:DEVELOPED_BY]-(g:Game)-[:AVAILABLE_ON]-(platform:Platform)-[:BELONGS_TO]-(gen:Generation)
+        WHERE c.name CONTAINS $company_name AND platform.name <> "NULL"
+        RETURN platform.name AS platform, gen.name AS generation, COUNT(g) AS count
+        """
+        result = session.run(query, company_name=company_name)
+        data = [{"platform": record["platform"], "generation": record["generation"], "count": record["count"]} for record in result]
+    return data
+
+
+@app.route("/graph/platform-distribution/<company_name>", methods=["GET"])
+def platform_distribution(company_name):
+    """Generate a Plotly sunburst chart for platform distribution."""
+    data = get_platform_distribution(company_name)  # Fetch data from Neo4j
+    if not data:
+        return jsonify({"error": "No data found"}), 404
+
+    # Convert data into a DataFrame and sort by count (descending)
+    df = pd.DataFrame(data).sort_values(by="count", ascending=False)
+
+    # Generate a sunburst chart
+    fig = px.sunburst(
+        df,
+        path=["generation", "platform"],  # Hierarchy: Generation -> Platform
+        values="count",  # Number of games per platform
+        title=f"Platforms where {company_name} released games",
+        color_discrete_sequence=px.colors.qualitative.Set3  # Optional: Custom color scheme
+    )
+
+    # Remove mode bar
+    fig.update_layout(showlegend=True)
+    fig.update_layout(
+        width=800,  # Adjust width (default is ~700)
+        height=800,  # Adjust height (default is ~450)
+    )
+
+
+    return jsonify(fig.to_json())
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
