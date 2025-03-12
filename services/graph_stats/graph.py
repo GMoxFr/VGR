@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, Response
 from flask_cors import CORS
 from neo4j import GraphDatabase
 import plotly.express as px
@@ -7,6 +7,7 @@ import os
 from dotenv import load_dotenv
 
 app = Flask(__name__)
+app.config["JSON_AS_ASCII"] = False  # To handle non-ASCII characters in JSON
 CORS(app)
 
 # Load credentials from environment variables
@@ -40,7 +41,7 @@ def get_genre_distribution(company_name):
         data = [{"genre": record["genre"], "count": record["count"]} for record in result]
     return data
 
-@app.route("/graph/genre-distribution/<company_name>", methods=["GET"])
+@app.route("/graphs/genre-distribution/<company_name>", methods=["GET"])
 def genre_distribution(company_name):
     """Generate a plotly graph for genre distribution."""
     
@@ -73,11 +74,20 @@ def genre_distribution(company_name):
         dragmode=False, 
         showlegend=False, 
         xaxis_title="", 
-        yaxis_title="Number of Games",
-        margin=dict(l=40, r=40, t=40, b=40)
+        yaxis_title="Nombre de jeux",
+        margin=dict(l=0, r=0, t=0, b=0),
+        paper_bgcolor="#222222",  # Dark background
+        plot_bgcolor="#222222",  # Dark background
+        font=dict(color="#FFFFFF"),  # White font color
+        width=1000,  # Adjust width (default is ~700)
+        title=None,
     )
-
-    return jsonify(fig.to_json())
+    
+    # return jsonify(fig.to_json())
+    return Response(
+        fig.to_json(),
+        mimetype='application/json'
+    )
 
 
 #--------- PLATFORM DISTRIBUTION ---------
@@ -95,7 +105,7 @@ def get_platform_distribution(company_name):
     return data
 
 
-@app.route("/graph/platform-distribution/<company_name>", methods=["GET"])
+@app.route("/graphs/platform-distribution/<company_name>", methods=["GET"])
 def platform_distribution(company_name):
     """Generate a Plotly sunburst chart for platform distribution."""
     data = get_platform_distribution(company_name)  # Fetch data from Neo4j
@@ -115,15 +125,21 @@ def platform_distribution(company_name):
     )
 
     # Remove mode bar
-    fig.update_layout(showlegend=True)
     fig.update_layout(
-        width=800,  # Adjust width (default is ~700)
-        height=800,  # Adjust height (default is ~450)
+        width=700,  # Adjust width (default is ~700)
+        height=700,  # Adjust height (default is ~450)
+        paper_bgcolor="#222222",  # Dark background
+        font=dict(color="#FFFFFF"),  # White font color
+        showlegend=True,
+        title=None,
+        margin=dict(l=0, r=0, t=0, b=0),
+    )
+
+    return Response(
+        fig.to_json(),
+        mimetype='application/json'
     )
 
 
-    return jsonify(fig.to_json())
-
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8002, debug=True)
+    app.run(host="0.0.0.0", port=8002, debug=True, threaded=True)

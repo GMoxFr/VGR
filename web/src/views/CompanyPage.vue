@@ -1,11 +1,10 @@
 <template>
     <div v-if="company" class="company-container">
+        <!-- Header de l'entreprise -->
         <div class="company-header-infos">
             <div class="company-header-info">
                 <h1>{{ company.name }}</h1>
-                <p v-if="company.country && countryWithFlag">
-                    {{ countryWithFlag }}
-                </p>
+                <p v-if="company.country && countryWithFlag">{{ countryWithFlag }}</p>
             </div>
         </div>
 
@@ -15,12 +14,7 @@
             <div class="similar-games-container">
                 <GameCard v-for="game in company.developedGames" :key="game.igdb_id.low" :game="game" />
             </div>
-
-            <!-- Bouton pour charger tous les jeux développés -->
-            <button v-if="!developAll && company.developedGames.length > 0" @click="toggleDevelop"
-                class="show-more-btn">
-                Afficher plus
-            </button>
+            <button v-if="!developAll" @click="toggleDevelop" class="show-more-btn">Afficher plus</button>
         </div>
 
         <!-- Liste des jeux publiés -->
@@ -29,17 +23,22 @@
             <div class="similar-games-container">
                 <GameCard v-for="game in company.publishedGames" :key="game.igdb_id.low" :game="game" />
             </div>
+            <button v-if="!publishAll" @click="togglePublish" class="show-more-btn">Afficher plus</button>
+        </div>
 
-            <button v-if="!publishAll && company.publishedGames.length > 0" @click="togglePublish"
-                class="show-more-btn">
-                Afficher plus
-            </button>
+        <!-- Graphiques -->
+        <div v-if="genreRef" class="company-details">
+            <h2>📊 Jeux par genre</h2>
+            <PlotlyChart :data="genreRef.data" :layout="genreRef.layout" />
+        </div>
+
+        <div v-if="platformRef" class="company-details">
+            <h2>📊 Jeux par plateformes</h2>
+            <PlotlyChart :data="platformRef.data" :layout="platformRef.layout" />
         </div>
 
         <!-- Message si aucun jeu trouvé -->
-        <p v-if="company.developedGames.length === 0 && company.publishedGames.length === 0" class="empty-message">
-            Aucun jeu trouvé pour cette société.
-        </p>
+        <p v-if="!hasGames" class="empty-message">Aucun jeu trouvé pour cette société.</p>
     </div>
 </template>
 
@@ -47,51 +46,88 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import api from "@/api";
-import GameCard from "./components/GameCard.vue";
+import graphs from "@/graphs";
 import iso3166 from "iso-3166-1";
 import emojiFlags from "emoji-flags";
+import GameCard from "./components/GameCard.vue";
+import PlotlyChart from "./components/PlotlyChart.vue";
 
 const route = useRoute();
 const company = ref(null);
+const developAll = ref(false);
+const publishAll = ref(false);
+const genreRef = ref(null);
+const platformRef = ref(null);
 
 const getNeo4jNumber = (value) => (value && typeof value.low !== "undefined" ? value.low : value);
 
-// Fonction pour récupérer le drapeau et le nom du pays
+/**
+ * Récupère et retourne le drapeau et le nom du pays.
+ */
 const getCountryWithFlag = (countryCode) => {
     const country = iso3166.whereNumeric(getNeo4jNumber(countryCode));
     if (!country) return null;
     const flag = emojiFlags[country.alpha2]?.emoji || "🏳";
     return `${flag} ${country.country}`;
 };
-
 const countryWithFlag = computed(() => getCountryWithFlag(company.value?.country));
 
-const developAll = ref(false);
-const publishAll = ref(false);
+/**
+ * Vérifie si l'entreprise a au moins un jeu développé ou publié.
+ */
+const hasGames = computed(() => company.value?.developedGames.length > 0 || company.value?.publishedGames.length > 0);
 
-// Fonction pour charger les jeux développés en entier
-const toggleDevelop = async () => {
-    developAll.value = true;
-    await fetchCompany();
-};
-
-// Fonction pour charger les jeux publiés en entier
-const togglePublish = async () => {
-    publishAll.value = true;
-    await fetchCompany();
-};
-
-// Charger les informations de la société avec les paramètres dynamiques
+/**
+ * Récupère les données de l'entreprise depuis l'API.
+ */
 const fetchCompany = async () => {
     try {
         const response = await api.company.get(route.params.companyId, developAll.value, publishAll.value);
         company.value = response.data;
+        fetchGraphs();
     } catch (error) {
         console.error("Erreur lors du chargement des données de l'entreprise:", error);
     }
 };
 
-// Charger les données au montage
+/**
+ * Récupère les données des graphiques (genres et plateformes).
+ */
+const fetchGraphs = async () => {
+    if (!company.value) return;
+
+    try {
+        const genreResponse = await graphs.genre_distribution.get(company.value.name);
+        genreRef.value = genreResponse.data;
+    } catch (error) {
+        console.error("Erreur lors du chargement des données des genres:", error);
+    }
+
+    try {
+        const platformResponse = await graphs.platform_distribution.get(company.value.name);
+        platformRef.value = platformResponse.data;
+    } catch (error) {
+        console.error("Erreur lors du chargement des données des plateformes:", error);
+    }
+};
+
+/**
+ * Charge tous les jeux développés.
+ */
+const toggleDevelop = async () => {
+    developAll.value = true;
+    await fetchCompany();
+};
+
+/**
+ * Charge tous les jeux publiés.
+ */
+const togglePublish = async () => {
+    publishAll.value = true;
+    await fetchCompany();
+};
+
+// Charge les données au montage du composant
 onMounted(fetchCompany);
 </script>
 
