@@ -56,4 +56,7 @@ router.get('/engines/:gameEngineId', validate(gameEngine.get.validation), trycat
 const rating = require('./controllers/rating');
 router.get('/ratings/:ratingId', validate(rating.get.validation), trycatch(rating.get.route));
 
+const user = require('./controllers/user');
+router.get('/users', validate(user.getAll.validation), trycatch(user.getAll.route));
+
 module.exports = router;
