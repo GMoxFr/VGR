@@ -1,0 +1,9 @@
+Flask
+flask-cors
+neo4j
+python-dotenv
+Pillow
+requests
+numpy
+colorgram.py
+tqdm
