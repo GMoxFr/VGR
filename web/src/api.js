@@ -26,7 +26,7 @@ const api = {
         },
         async deleteUser() {
             return axiosInstance.delete('/api/profile');
-        },
+        }
     },
     auth: {
         async signup(data) {
@@ -132,6 +132,11 @@ const api = {
                     maxResults
                 }
             });
+        }
+    },
+    user: {
+        async getAll() {
+            return axiosInstance.get('/api/users');
         }
     }
 }

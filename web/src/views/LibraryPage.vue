@@ -2,10 +2,27 @@
     <div class="library-page">
         <h1>{{ isOwnLibrary ? "Ma bibliothèque" : `Bibliothèque de ${username}` }}</h1>
 
+        <!-- Encadré de la palette -->
+        <div v-if="!paletteLoaded && !paletteLoading && games.length > 0 && !paletteError" class="palette-box"
+            @click="loadPalette">
+            <button class="palette-button">🎨 Charger la palette</button>
+        </div>
+        <div v-if="!paletteLoaded && paletteLoading && games.length > 0 && !paletteError" class="palette-box loading">
+            <p class="loading-text">Chargement de la palette<span class="dots"></span></p>
+        </div>
+        <div v-if="paletteLoaded && games.length > 0 && !paletteError" class="palette-container">
+            <img :src="paletteUrl" alt="Palette de couleurs" class="palette-image" />
+        </div>
+        <div v-if="paletteError && games.length > 0" class="palette-container">
+            <p>Palette non disponible</p>
+        </div>
+
+
         <!-- Boutons Exporter / Importer -->
         <div class="actions" v-if="gameCount > 0 || isOwnLibrary">
             <button v-if="gameCount > 0" @click="exportLibrary">📥 Exporter</button>
-            <button v-if="isOwnLibrary" @click="openFileInput">📤 Importer</button>
+            <button v-if="isOwnLibrary && !importLoading" @click="openFileInput">📤 Importer</button>
+            <button v-if="isOwnLibrary && importLoading" class="import-loading">⏳ Import en cours...</button>
             <input type="file" ref="fileInput" @change="handleFileUpload" accept=".csv" hidden />
         </div>
 
@@ -46,6 +63,7 @@ import { useUserStore } from "@/store/userStore";
 import api from "@/api";
 import importer from "@/importer";
 import exporter from "@/exporter";
+import palette from "@/palette";
 import GameCard from "./components/GameCard.vue";
 
 const route = useRoute();
@@ -58,6 +76,12 @@ const gameCount = ref(0);
 const page = ref(1);
 const maxResults = 15;
 const fileInput = ref(null);
+const importLoading = ref(false);
+
+const paletteUrl = ref(null);
+const paletteLoaded = ref(false);
+const paletteLoading = ref(false);
+const paletteError = ref(false);
 
 // Vérifie si c'est la bibliothèque du user connecté
 const isOwnLibrary = computed(() => userStore.user?.username === username.value);
@@ -127,6 +151,8 @@ const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
+    importLoading.value = true; // Active le loading
+
     try {
         await importer.post(file);
         fetchLibrary(); // Recharge la bibliothèque après l'import
@@ -134,6 +160,27 @@ const handleFileUpload = async (event) => {
     } catch (error) {
         console.error("Erreur lors de l'import :", error);
         alert("Échec de l'import.");
+    } finally {
+        importLoading.value = false; // Désactive le loading
+    }
+};
+
+const loadPalette = async () => {
+    if (!username.value) return;
+    try {
+        paletteLoading.value = true;
+        const response = await palette.get(username.value, "User");
+        const imageUrl = URL.createObjectURL(response.data);
+        paletteUrl.value = imageUrl;
+        paletteLoaded.value = true;
+    } catch (error) {
+        console.error("Erreur lors du chargement de la palette :", error);
+        if (error.response && error.response.status === 404) {
+            paletteError.value = true;
+            paletteLoaded.value = false;
+        }
+    } finally {
+        paletteLoading.value = false;
     }
 };
 
@@ -144,6 +191,9 @@ watch(() => route.params.username, (newUsername) => {
     if (!username.value) {
         router.push("/");
     } else {
+        paletteLoaded.value = false;
+        paletteUrl.value = null;
+        paletteError.value = false;
         fetchLibrary();
     }
 }, { immediate: true });
@@ -231,6 +281,100 @@ onMounted(fetchLibrary);
 .pagination .active {
     background-color: #0056b3;
     font-weight: bold;
+}
+
+/* Encadré de la palette */
+.palette-box {
+    width: 50%;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 2px dashed rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: background 0.3s ease-in-out;
+}
+
+/* Effet de pulsation sur le chargement */
+.palette-box.loading {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    50% {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    100% {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Animation pour le texte de chargement */
+.loading-text {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.dots::after {
+    content: "";
+    animation: dots-animation 1.5s infinite;
+}
+
+@keyframes dots-animation {
+    0% {
+        content: ".";
+    }
+
+    33% {
+        content: "..";
+    }
+
+    66% {
+        content: "...";
+    }
+
+    100% {
+        content: ".";
+    }
+}
+
+/* Palette affichée */
+.palette-container {
+    width: 50%;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.palette-image {
+    max-width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.palette-button {
+    padding: 10px 15px;
+    background: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+
+.palette-button:hover {
+    background: #218838;
 }
 
 /* Message si la bibliothèque est vide */

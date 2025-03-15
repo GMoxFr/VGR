@@ -8,13 +8,27 @@
             </div>
         </div>
 
+        <!-- Encadré de la palette -->
+        <div v-if="!paletteLoaded && !paletteLoading" class="palette-box" @click="loadPalette">
+            <button class="palette-button">🎨 Charger la palette</button>
+        </div>
+
+        <div v-if="!paletteLoaded && paletteLoading" class="palette-box loading">
+            <p class="loading-text">Chargement de la palette<span class="dots"></span></p>
+        </div>
+
+        <div v-if="paletteLoaded" class="palette-container">
+            <img :src="paletteUrl" alt="Palette de couleurs" class="palette-image" />
+        </div>
+
         <!-- Liste des jeux développés -->
         <div v-if="company.developedGames.length > 0" class="company-details">
             <h2>🎮 Jeux développés</h2>
             <div class="similar-games-container">
                 <GameCard v-for="game in company.developedGames" :key="game.igdb_id.low" :game="game" />
             </div>
-            <button v-if="!developAll" @click="toggleDevelop" class="show-more-btn">Afficher plus</button>
+            <button v-if="!developAll && company.developedGames.length >= 10" @click="toggleDevelop"
+                class="show-more-btn">Afficher plus</button>
         </div>
 
         <!-- Liste des jeux publiés -->
@@ -23,7 +37,8 @@
             <div class="similar-games-container">
                 <GameCard v-for="game in company.publishedGames" :key="game.igdb_id.low" :game="game" />
             </div>
-            <button v-if="!publishAll" @click="togglePublish" class="show-more-btn">Afficher plus</button>
+            <button v-if="!publishAll && company.publishedGames.length >= 10" @click="togglePublish"
+                class="show-more-btn">Afficher plus</button>
         </div>
 
         <!-- Graphiques -->
@@ -46,6 +61,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import api from "@/api";
+import palette from "@/palette";
 import graphs from "@/graphs";
 import iso3166 from "iso-3166-1";
 import emojiFlags from "emoji-flags";
@@ -58,6 +74,9 @@ const developAll = ref(false);
 const publishAll = ref(false);
 const genreRef = ref(null);
 const platformRef = ref(null);
+const paletteUrl = ref(null);
+const paletteLoaded = ref(false);
+const paletteLoading = ref(false);
 
 const getNeo4jNumber = (value) => (value && typeof value.low !== "undefined" ? value.low : value);
 
@@ -87,6 +106,24 @@ const fetchCompany = async () => {
         fetchGraphs();
     } catch (error) {
         console.error("Erreur lors du chargement des données de l'entreprise:", error);
+    }
+};
+
+/**
+ * Charge la palette de l'entreprise.
+ */
+const loadPalette = async () => {
+    if (!company.value) return;
+    try {
+        paletteLoading.value = true;
+        const response = await palette.get(company.value.name, "Company");
+        const imageUrl = URL.createObjectURL(response.data);
+        paletteUrl.value = imageUrl;
+        paletteLoaded.value = true;
+    } catch (error) {
+        console.error("Erreur lors du chargement de la palette :", error);
+    } finally {
+        paletteLoading.value = false;
     }
 };
 
@@ -206,5 +243,124 @@ onMounted(fetchCompany);
 
 .show-more-btn:hover {
     background: rgba(255, 255, 255, 0.2);
+}
+
+.palette-box {
+    width: 50%;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 2px dashed rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: background 0.3s ease-in-out;
+}
+
+.palette-box:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.palette-button {
+    padding: 10px 15px;
+    background: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+
+.palette-button:hover {
+    background: #218838;
+}
+
+.palette-container {
+    width: 50%;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.palette-image {
+    max-width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Effet de pulsation sur le chargement */
+.palette-box.loading {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    50% {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    100% {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Animation pour le texte de chargement */
+.loading-text {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.dots::after {
+    content: "";
+    animation: dots-animation 1.5s infinite;
+}
+
+@keyframes dots-animation {
+    0% {
+        content: ".";
+    }
+
+    33% {
+        content: "..";
+    }
+
+    66% {
+        content: "...";
+    }
+
+    100% {
+        content: ".";
+    }
+}
+
+/* Palette affichée */
+.palette-container {
+    width: 50%;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.palette-image {
+    max-width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Message si aucun jeu trouvé */
+.empty-message {
+    font-size: 18px;
+    margin-top: 20px;
+    color: rgba(255, 255, 255, 0.7);
 }
 </style>
