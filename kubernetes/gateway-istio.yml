@@ -67,6 +67,14 @@ spec:
           number: 85
   - match:
     - uri:
+        prefix: /palette
+    route:
+    - destination: 
+        host: palette.default.svc.cluster.local
+        port:
+          number: 86
+  - match:
+    - uri:
         prefix: /
     route:
     - destination:

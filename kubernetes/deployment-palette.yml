@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: palette
+  labels:
+    app: palette
+    version: "1.0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: palette
+  template:
+    metadata:
+      labels:
+        app: palette
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: palette
+          image: gmoxfr/vgr:palette-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8005
+          envFrom:
+            - secretRef:
+                name: api-secrets
+      restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: palette
+  labels:
+    app: palette
+spec:
+  selector:
+    app: palette
+  ports:
+    - protocol: TCP
+      port: 86
+      targetPort: 8005
+  type: LoadBalancer
+status:
+  loadBalancer: {}
