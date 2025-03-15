@@ -223,7 +223,7 @@ const fetchGameCover = async () => {
 };
 
 const useBackground = ref(false);
-const gameBackground = ref("/background.jpg");
+const gameBackground = ref("");
 const gameBackgroundColor = ref("#789399");
 
 const fetchGameBackground = async () => {
@@ -240,7 +240,7 @@ const fetchGameBackground = async () => {
             gameBackground.value = URL.createObjectURL(blob);
         } catch (error) {
             console.error("Erreur chargement background :", error);
-            gameBackground.value = "/background.jpg";
+            gameBackground.value = "";
         }
     } else if (game.value?.cover_image_id[10001]) {
         try {
@@ -250,7 +250,7 @@ const fetchGameBackground = async () => {
             useBackground.value = false;
         } catch (error) {
             console.error("Erreur chargement background :", error);
-            gameBackground.value = "/background.jpg";
+            gameBackground.value = "";
         }
     }
 };
@@ -325,7 +325,6 @@ watch(user, (newUser) => {
     width: 110%;
     /* Augmenté pour masquer les bords du flou */
     height: 110%;
-    /* background-image: url("/public/background.jpg"); */
     /* Image de fond */
     background-size: cover;
     background-position: center;
