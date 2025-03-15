@@ -201,7 +201,7 @@ const removeFromLibrary = async () => {
 
 const getNeo4jNumber = (value) => (value && typeof value.low !== "undefined" ? value.low : value);
 
-const gameCover = ref("/placeholder-game.png"); // Image par défaut
+const gameCover = ref("/placeholder.png"); // Image par défaut
 
 const fetchGameCover = async () => {
     if (game.value?.cover_image_id) {
@@ -217,7 +217,7 @@ const fetchGameCover = async () => {
             gameCover.value = URL.createObjectURL(blob);
         } catch (error) {
             console.error("Erreur chargement cover :", error);
-            gameCover.value = "/placeholder-game.png";
+            gameCover.value = "/placeholder.png";
         }
     }
 };
@@ -296,6 +296,13 @@ watch(game, (newGame) => {
 watch(user, (newUser) => {
     if (newUser) {
         fetchOwned();
+    }
+});
+
+document.title = "VGR - Game";
+watch(game, () => {
+    if (game.value) {
+        document.title = `VGR - ${game.value.title}`;
     }
 });
 </script>

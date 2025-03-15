@@ -83,6 +83,16 @@ onMounted(() => {
     searchQuery.value = route.query.query || "";
     fetchGames();
 });
+
+document.title = "VGR - Recherche";
+if (searchQuery.value) {
+    document.title = `VGR - ${searchQuery.value}`;
+}
+watch(searchQuery, () => {
+    if (searchQuery.value) {
+        document.title = `VGR - ${searchQuery.value}`;
+    }
+});
 </script>
 
 <style scoped>

@@ -83,6 +83,13 @@ const nameWithCount = computed(() => {
 
 watch(page, fetchGames);
 onMounted(fetchGames);
+
+document.title = "VGR - Plateforme";
+watch(platform, () => {
+    if (platform.value) {
+        document.title = `VGR - ${platform.value.name}`;
+    }
+});
 </script>
 
 <style scoped>

@@ -83,6 +83,14 @@ const nameWithCount = computed(() => {
 
 watch(page, fetchGames);
 onMounted(fetchGames);
+
+document.title = "VGR - Note";
+watch(rating, () => {
+    if (rating.value) {
+        document.title = `VGR - ${rating.value.name}`;
+    }
+});
+
 </script>
 
 <style scoped>

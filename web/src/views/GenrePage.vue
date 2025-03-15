@@ -81,6 +81,14 @@ const nameWithCount = computed(() => {
     return `${genre.value.name} (${gameCount.value})`;
 });
 
+// Mettre à jour le titre de la page
+document.title = "VGR - Genre";
+watch(genre, () => {
+    if (genre.value) {
+        document.title = `VGR - ${genre.value.name}`;
+    }
+});
+
 watch(page, fetchGames);
 onMounted(fetchGames);
 </script>

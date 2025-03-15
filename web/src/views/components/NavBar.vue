@@ -2,7 +2,7 @@
     <nav class="navbar">
         <!-- Colonne gauche : Bouton Home -->
         <div class="nav-left">
-            <button class="nav-btn" @click="goHome">VGR</button>
+            <img src="/VGR_small.png" alt="VGR Logo" class="nav-logo" @click="goHome" />
         </div>
 
         <!-- Colonne centrale : Barre de recherche -->
@@ -222,5 +222,19 @@ document.addEventListener("click", () => {
 
 .logout:hover {
     background: rgba(217, 83, 79, 0.2);
+}
+
+/* Logo Home */
+.nav-logo {
+    height: 80px;
+    /* Ajuste la hauteur du logo */
+    cursor: pointer;
+    /* Curseur en mode clic */
+    transition: opacity 0.2s ease-in-out;
+}
+
+.nav-logo:hover {
+    opacity: 0.8;
+    /* Effet de survol */
 }
 </style>

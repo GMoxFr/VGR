@@ -58,7 +58,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import api from "@/api";
 import palette from "@/palette";
@@ -166,6 +166,13 @@ const togglePublish = async () => {
 
 // Charge les données au montage du composant
 onMounted(fetchCompany);
+
+document.title = "VGR - Société";
+watch(company, () => {
+    if (company.value) {
+        document.title = `VGR - ${company.value.name}`;
+    }
+});
 </script>
 
 <style scoped>

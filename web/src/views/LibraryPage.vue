@@ -184,9 +184,12 @@ const loadPalette = async () => {
     }
 };
 
+document.title = "VGR - Bibliothèque";
+
 // Watch pour actualiser quand l’URL change
 watch(() => route.params.username, (newUsername) => {
     username.value = newUsername || userStore.user?.username || "";
+    document.title = `VGR - ${username.value}`;
     page.value = 1;
     if (!username.value) {
         router.push("/");

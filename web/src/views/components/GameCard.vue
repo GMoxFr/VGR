@@ -27,7 +27,7 @@ const props = defineProps({
 const marqueePaused = ref(true);
 const showMarquee = ref(true);
 const blobImg = ref(null);
-const gameImage = ref("/placeholder-game.png");
+const gameImage = ref("/placeholder.png");
 
 // Fonction pour récupérer l’image du jeu depuis l'API et la stocker en binaire
 const fetchGameImage = async () => {
@@ -46,7 +46,7 @@ const fetchGameImage = async () => {
             gameImage.value = URL.createObjectURL(blob);
         } catch (error) {
             console.error("Erreur chargement image :", error);
-            gameImage.value = "/placeholder-game.png";
+            gameImage.value = "/placeholder.png";
         }
     }
 };

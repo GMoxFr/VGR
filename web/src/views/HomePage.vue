@@ -51,6 +51,8 @@ const fetchUsers = async () => {
     }
 };
 
+document.title = "VGR";
+
 // Charger les jeux populaires au montage
 onMounted(fetchPopularGames);
 onMounted(fetchUsers);
