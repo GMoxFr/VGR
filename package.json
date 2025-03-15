@@ -1,6 +1,13 @@
 {
   "dependencies": {
     "@vuelidate/core": "^2.0.3",
-    "@vuelidate/validators": "^2.0.4"
+    "@vuelidate/validators": "^2.0.4",
+    "csv-parse": "^5.6.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "fs": "^0.0.1-security",
+    "json2csv": "^6.0.0-alpha.2",
+    "multer": "^1.4.5-lts.1",
+    "neode": "^0.4.9"
   }
 }

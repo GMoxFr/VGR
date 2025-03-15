@@ -51,6 +51,22 @@ spec:
           number: 83
   - match:
     - uri:
+        prefix: /export
+    route:
+    - destination: 
+        host: export.default.svc.cluster.local
+        port:
+          number: 84
+  - match:
+    - uri:
+        prefix: /import
+    route:
+    - destination: 
+        host: import.default.svc.cluster.local
+        port:
+          number: 85
+  - match:
+    - uri:
         prefix: /
     route:
     - destination:

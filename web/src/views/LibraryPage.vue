@@ -2,6 +2,13 @@
     <div class="library-page">
         <h1>{{ isOwnLibrary ? "Ma bibliothèque" : `Bibliothèque de ${username}` }}</h1>
 
+        <!-- Boutons Exporter / Importer -->
+        <div class="actions" v-if="gameCount > 0 || isOwnLibrary">
+            <button v-if="gameCount > 0" @click="exportLibrary">📥 Exporter</button>
+            <button v-if="isOwnLibrary" @click="openFileInput">📤 Importer</button>
+            <input type="file" ref="fileInput" @change="handleFileUpload" accept=".csv" hidden />
+        </div>
+
         <div v-if="games.length > 0" class="games">
             <div class="game-list">
                 <GameCard v-for="game in games" :key="game.igdb_id.low" :game="game" />
@@ -37,6 +44,8 @@ import { ref, computed, watch, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/store/userStore";
 import api from "@/api";
+import importer from "@/importer";
+import exporter from "@/exporter";
 import GameCard from "./components/GameCard.vue";
 
 const route = useRoute();
@@ -48,6 +57,7 @@ const games = ref([]);
 const gameCount = ref(0);
 const page = ref(1);
 const maxResults = 15;
+const fileInput = ref(null);
 
 // Vérifie si c'est la bibliothèque du user connecté
 const isOwnLibrary = computed(() => userStore.user?.username === username.value);
@@ -91,6 +101,42 @@ const setPage = (pageNum) => {
     }
 };
 
+// EXPORT CSV
+const exportLibrary = async () => {
+    try {
+        const response = await exporter.get(username.value);
+        if (response.status !== 200) {
+            throw new Error("Erreur lors de l'exportation");
+        }
+        const blob = new Blob([response.data], { type: "text/csv" });
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `${username.value}_games.csv`;
+        link.click();
+    } catch (error) {
+        console.error("Erreur lors de l'export :", error);
+    }
+};
+
+// IMPORT CSV
+const openFileInput = () => {
+    fileInput.value.click();
+};
+
+const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+        await importer.post(file);
+        fetchLibrary(); // Recharge la bibliothèque après l'import
+        alert("Import réussi !");
+    } catch (error) {
+        console.error("Erreur lors de l'import :", error);
+        alert("Échec de l'import.");
+    }
+};
+
 // Watch pour actualiser quand l’URL change
 watch(() => route.params.username, (newUsername) => {
     username.value = newUsername || userStore.user?.username || "";
@@ -117,8 +163,28 @@ onMounted(fetchLibrary);
     text-align: center;
 }
 
+.actions {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.actions button {
+    padding: 10px 15px;
+    border: none;
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: 0.2s ease-in-out;
+}
+
+.actions button:hover {
+    background-color: #218838;
+}
+
 .games {
-    width: 70%;
     display: flex;
     flex-direction: column;
     align-items: center;

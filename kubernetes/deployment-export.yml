@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: export
+  labels:
+    app: export
+    version: "1.0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: export
+  template:
+    metadata:
+      labels:
+        app: export
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: export
+          image: gmoxfr/vgr:export-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: api-secrets
+      restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: export
+  labels:
+    app: export
+spec:
+  selector:
+    app: export
+  ports:
+    - protocol: TCP
+      port: 84
+      targetPort: 8003
+  type: LoadBalancer
+status:
+  loadBalancer: {}

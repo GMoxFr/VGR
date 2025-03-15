@@ -6,3 +6,5 @@ data:
   VUE_APP_API_URL: "http://vgr.local"
   VUE_APP_IMAGE_URL: "http://vgr.local"
   VUE_APP_GRAPHS_URL: "http://vgr.local"
+  VUE_APP_EXPORT_URL: "http://vgr.local"
+  VUE_APP_IMPORT_URL: "http://vgr.local"
