@@ -15,17 +15,29 @@ spec:
       labels:
         app: web
     spec:
+      volumes:
+        - name: config-volume
+          configMap:
+            name: web-config
       imagePullSecrets:
         - name: regcred
       containers:
         - name: web
           image: gmoxfr/vgr:web-latest
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/dist/config.js
+              subPath: config.js
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
-          envFrom:
-            - configMapRef:
-                name: web-config
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
       restartPolicy: Always
 
 ---

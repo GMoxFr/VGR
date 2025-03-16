@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-    baseURL: process.env.VUE_APP_IMAGES_URL,
+    baseURL: window.config?.VUE_APP_IMAGES_URL || process.env.VUE_APP_IMAGES_URL,
 });
 
 const images = {

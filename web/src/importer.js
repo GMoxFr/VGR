@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useUserStore } from '@/store/userStore';
 
 const axiosInstance = axios.create({
-    baseURL: process.env.VUE_APP_IMPORT_URL,
+    baseURL: window.config?.VUE_APP_IMPORT_URL || process.env.VUE_APP_IMPORT_URL,
 });
 
 axiosInstance.interceptors.request.use(

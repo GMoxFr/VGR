@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-    baseURL: process.env.VUE_APP_GRAPHS_URL,
+    baseURL: window.config?.VUE_APP_GRAPHS_URL || process.env.VUE_APP_GRAPHS_URL,
 });
 
 const graphs = {
